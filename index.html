@@ -113,6 +113,20 @@
         </div>
       </div>
     </div>
+    <script>
+      (function() {
+        // Otomatis deteksi jika server Hostinger menyajikan file root index.html mentah
+        if (typeof window !== 'undefined' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.pathname.indexOf('/dist') !== 0) {
+          fetch('/dist/index.html', { method: 'HEAD' })
+            .then(function(res) {
+              if (res.ok) {
+                window.location.replace('/dist/' + window.location.search + window.location.hash);
+              }
+            })
+            .catch(function() {});
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

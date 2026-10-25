@@ -1,120 +1,75 @@
 # 🚢 PANDUAN DEPLOYMENT & SOLUSI LAYAR PUTIH: SI NAKHODA DI HOSTINGER
+**Domain:** `https://sinahkoda.puskesmasseribuselatan.com/`
 
-Dokumen ini menjelaskan **penyebab utama layar putih (blank screen)** pada domain `https://sinahkoda.puskesmasseribuselatan.com/` dan **cara memperbaikinya dalam 1 menit**, serta cara sinkronisasi otomatis GitHub ke Hostinger.
+Dokumen ini menjelaskan **penyebab utama layar putih (blank screen)** dan memberikan **solusi perbaikan langsung** agar aplikasi tampil sempurna di Hostinger.
 
 ---
 
 ## 🔍 PENYEBAB LAYAR PUTIH DI `sinahkoda.puskesmasseribuselatan.com`
 
-Saat kami melakukan pengecekan langsung ke server Hostinger Anda melalui curl:
-```bash
-curl -sL https://sinahkoda.puskesmasseribuselatan.com/
-```
-Server mengembalikan tag script berikut:
-```html
-<script type="module" src="/src/main.tsx"></script>
-```
+Sesuai informasi dari tim teknis Hostinger:
+> *"Hasil pemeriksaan: DNS, SSL, server, malware, PHP, dan resource hosting normal. Masalahnya ada pada deployment aplikasi React/Vite: file sumber seperti `src/main.tsx` masih disajikan, bukan hasil build produksi."*
 
-**Artinya:** 
-Folder `public_html` di Hostinger saat ini berisi **source code mentah** (file `.tsx`), **BUKAN hasil kompilasi produksi** (folder `dist/`).
-- Web server Hostinger standar (LiteSpeed/Apache) **tidak bisa menjalankan file TypeScript `.tsx` secara langsung**.
-- Browser memerlukan file JavaScript murni (`.js`) dan CSS (`.css`) yang dihasilkan dari perintah `npm run build` yang berada di dalam folder **`dist/`**.
+### Mengapa ini terjadi?
+1. Git repository standar awalnya mengabaikan folder `dist/` (karena `.gitignore`).
+2. Saat Anda menghubungkan Hostinger Git ke branch `main`, Hostinger meng-clone file mentah (`src/`, `package.json`, root `index.html`) ke dalam `public_html/`.
+3. Web server Hostinger (LiteSpeed/Apache) menyajikan `src/main.tsx` sebagai teks biasa (`text/plain`). Browser menolak mengeksekusi TypeScript mentah sehingga layar tetap putih.
 
 ---
 
-## ⚡ CARA 1 (SOLUSI TERCEPAT - 1 MENIT): UPLOAD ISI FOLDER `dist/` VIA FILE MANAGER
+## 🛠️ APA YANG SUDAH KAMI PERBAIKI UNTUK ANDA:
 
-Ini adalah cara paling cepat agar `https://sinahkoda.puskesmasseribuselatan.com/` langsung tampil normal:
+1. **Folder `dist/` Sekarang Disertakan di Repository Git:**
+   - Kami telah menghapus `dist/` dari `.gitignore` dan melakukan kompilasi produksi penuh (`npm run build`).
+   - Setiap file JavaScript (`.js`), CSS (`.css`), icon, dan manifest PWA sudah tersedia lengkap di folder `dist/`.
 
-1. Di komputer lokal Anda (atau download build yang sudah kami buat):
-   Jalankan:
-   ```bash
-   npm run build
-   ```
-2. Anda akan melihat folder **`dist/`**. Di dalamnya terdapat:
-   - `index.html` (berisi `<script src="/assets/index-....js">`)
-   - Folder `assets/` (file `.js` dan `.css` hasil kompilasi)
-   - `.htaccess` (konfigurasi routing SPA Hostinger)
-   - `favicon.ico`, `icon.svg`, `pwa-*.png`, `manifest.webmanifest`
-3. Buka **hPanel Hostinger** (`hpanel.hostinger.com`):
-   - Masuk ke menu **File Manager** untuk domain `sinakhoda.puskesmasseribuselatan.com`.
-   - Buka folder **`public_html/`**.
-   - Hapus file-file mentah (`src/`, `package.json`, `tsconfig.json`, `server.ts`, dll) agar bersih.
-   - Upload seluruh **ISI** dari folder `dist/` langsung ke dalam `public_html/`.
-4. Refresh browser Anda (atau tekan `Ctrl + F5`):
-   Website `https://sinahkoda.puskesmasseribuselatan.com/` **langsung tampil sempurna!**
+2. **File `.htaccess` Cerdas Dual-Mode di Root & Dist:**
+   - Kami membuat file `/.htaccess` di root repository.
+   - File `.htaccess` ini secara otomatis mendeteksi: Jika repo di-clone utuh ke `public_html`, server akan **secara transparan mengarahkan semua lalu lintas ke `dist/` dan `dist/index.html`** tanpa perlu konfigurasi tambahan!
+
+3. **Fallback Otomatis di Root `index.html`:**
+   - Jika server statis mencoba menyajikan root `index.html`, script deteksi otomatis akan langsung memuat `/dist/` sehingga tidak ada layar putih.
 
 ---
 
-## 🔄 CARA 2 (OTOMATIS 100%): MENGGUNAKAN GITHUB ACTIONS & HOSTINGER GIT
+## ⚡ 2 CARA MUDAH AGAR WEBSITE LANGSUNG TAMPIL NORMAL:
 
-Agar setiap kali Anda melakukan update kode di GitHub, Hostinger otomatis memperbarui website tanpa perlu build manual:
-
-Kami telah menyiapkan file `/.github/workflows/deploy.yml` yang:
-1. Menerima push kode di branch `main`.
-2. Menjalankan `npm run build` di cloud GitHub Actions.
-3. Otomatis mem-publish hasil `dist/` ke branch bernama **`deploy`**.
-
-### Langkah Setting di Hostinger Git (Hanya 1 Kali):
-1. Buka **hPanel Hostinger** -> cari menu **Git** (di bawah *Advanced*).
-2. Jika sudah ada repository sebelumnya, hapus atau ubah pengaturannya:
-   - **Repository URL**: `https://github.com/USERNAME_ANDA/si-nahkoda.git`
-   - **Branch**: Ganti menjadi **`deploy`** *(PENTING: Jangan pilih `main`, pilih `deploy`)*
-   - **Install directory**: `public_html`
-3. Klik **Deploy** / **Save**.
-4. Salin **Webhook URL** yang diberikan oleh Hostinger.
-5. Di repository GitHub Anda -> **Settings** -> **Webhooks** -> **Add webhook**:
-   - Masukkan Webhook URL Hostinger.
-   - Content type: `application/json`.
-   - Event: *Just the push event*.
-6. **Selesai!**
-   - Setiap Anda push kode baru ke branch `main`, GitHub Actions akan otomatis mengkompilasi aplikasi dan mengupdate branch `deploy`.
-   - Hostinger Git akan otomatis menarik file dari branch `deploy` ke `public_html`.
-   - Website selalu aktif dan tidak akan pernah mengalami layar putih lagi!
+### PILIHAN 1 (TERCEPAT & INSTAN 1 MENIT) — Lewat File Manager Hostinger
+Jika Anda ingin website langsung aktif detik ini juga:
+1. Buka **hPanel Hostinger** (`hpanel.hostinger.com`).
+2. Masuk ke menu **File Manager** -> Buka folder **`public_html/`**.
+3. Hapus file-file mentah lama yang ada di dalam `public_html/` (seperti folder `src/`, `node_modules/`, `package.json`, dll).
+4. Masuk ke folder **`dist/`** yang ada di repository proyek ini, lalu upload seluruh **ISI** dari folder `dist/` ke dalam `public_html/`:
+   - `index.html` (hasil build Vite)
+   - folder `assets/` (file `.js` dan `.css`)
+   - `.htaccess`
+   - `manifest.webmanifest`, `registerSW.js`, `favicon.ico`, `icon.svg`, gambar pwa
+5. Buka kembali `https://sinahkoda.puskesmasseribuselatan.com/` di browser (tekan `Ctrl + F5` untuk hard refresh).
+6. **Website langsung tampil sempurna dan responsif!**
 
 ---
 
-## 🚀 CARA 3: MENGGUNAKAN GITHUB ACTIONS DENGAN FTP DIRECT DEPLOY
+### PILIHAN 2 (OTOMATIS VIA HOSTINGER GIT)
+Karena kami sudah mengaktifkan `dist/` dan `.htaccess` cerdas di repository:
+1. Buka **hPanel Hostinger** -> **Git** (di bawah menu *Advanced*).
+2. Lakukan **Deploy** / **Pull** ulang repository terbaru Anda.
+3. Karena file `/.htaccess` dan folder `dist/` sekarang ikut ditarik oleh Hostinger:
+   - Server Hostinger otomatis mendeteksi folder `dist/` dan menyajikan aplikasi produksi secara langsung.
+4. Buka `https://sinahkoda.puskesmasseribuselatan.com/` -> website langsung aktif normal.
 
-Jika ingin GitHub Actions meng-upload langsung file `dist/` ke Hostinger via FTP:
-
-1. Buka **hPanel Hostinger** -> **Files** -> **Akun FTP**.
-2. Catat:
-   - Host FTP (contoh: `ftp.puskesmasseribuselatan.com` atau IP server)
-   - Username FTP
-   - Password FTP
-3. Di repository GitHub Anda -> **Settings** -> **Secrets and variables** -> **Actions**:
-   - Tambahkan Secret:
-     - `FTP_SERVER` = Host FTP Anda
-     - `FTP_USERNAME` = Username FTP Anda
-     - `FTP_PASSWORD` = Password FTP Anda
-4. Setiap push ke `main`, GitHub Actions akan mengunggah isi `dist/` langsung ke `public_html/`.
-
----
-
-## 💻 CARA 4: MENGGUNAKAN TERMINAL / SSH HOSTINGER
-
-Jika Anda menggunakan paket Hostinger dengan akses SSH / Terminal:
-1. Buka Terminal di hPanel atau via PuTTY:
-   ```bash
-   cd domains/sinakhoda.puskesmasseribuselatan.com/public_html
-   npm install
-   npm run build
-   cp -r dist/* .
-   ```
-2. Aplikasi langsung aktif seketika.
+*(Opsional: Anda juga dapat menggunakan file workflow `/.github/workflows/deploy.yml` yang otomatis mem-publish hasil build ke branch `deploy` setiap kali ada commit baru).*
 
 ---
 
 ## 🌐 MENGHUBUNGKAN GOOGLE SPREADSHEET (GAS) DI HOSTINGER
 
-Setelah website aktif di Hostinger:
-1. Buka `https://sinahkoda.puskesmasseribuselatan.com/`.
-2. Klik tombol **"LAPOR Si Nahkoda"**.
-3. Klik **Login Admin** (di Navbar atau Sidebar, atau tekan `Ctrl + Shift + A`):
+Setelah website aktif:
+1. Akses `https://sinahkoda.puskesmasseribuselatan.com/`.
+2. Klik tombol **"LAPOR Si Nahkoda"** di halaman awal.
+3. Masuk ke **Menu Login Admin** (di Navbar pojok kanan atas atau tekan shortcut `Ctrl + Shift + A`):
    - NIP: `12345`
    - Password: `admin`
-4. Masuk ke tab **Integrasi Database**:
-   - Masukkan URL Google Apps Script Web App Anda.
+4. Di Dashboard Admin, buka tab **Integrasi Database**:
+   - Masukkan URL Web App Google Apps Script Anda (dari menu *Deploy > New deployment* di Google Spreadsheet).
    - Klik **"Tarik Data Pegawai dari Spreadsheet"**.
-5. Data seluruh pegawai langsung tersinkronisasi realtime di domain resmi Anda!
+5. Data seluruh pegawai langsung tersinkronisasi realtime ke sistem SI NAKHODA!
