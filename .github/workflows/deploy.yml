@@ -7,6 +7,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-and-deploy:
     name: 🚀 Build & Deploy
@@ -27,7 +30,18 @@ jobs:
       - name: 🏗️ Build production application
         run: npm run build
 
-      - name: 🌐 Deploy to Hostinger via FTP
+      # METODE A: Otomatis publish hasil build ke branch 'deploy'
+      # Sehingga di Hostinger Git hPanel, Anda tinggal memilih Branch: 'deploy'
+      - name: 🌿 Publish dist to 'deploy' branch (Untuk Hostinger Git)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: deploy
+          commit_message: "chore: deploy SI NAKHODA production build [skip ci]"
+
+      # METODE B: Otomatis upload via FTP jika secrets FTP diatur di GitHub
+      - name: 🌐 Deploy to Hostinger via FTP (Opsional)
         if: ${{ secrets.FTP_SERVER != '' && secrets.FTP_USERNAME != '' && secrets.FTP_PASSWORD != '' }}
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -37,16 +51,3 @@ jobs:
           local-dir: ./dist/
           server-dir: ./public_html/
           dangerous-clean-slate: false
-
-      - name: ℹ️ Catatan Deployment
-        if: ${{ secrets.FTP_SERVER == '' || secrets.FTP_USERNAME == '' || secrets.FTP_PASSWORD == '' }}
-        run: |
-          echo "=========================================================="
-          echo "Build SI NAKHODA berhasil!"
-          echo "Jika ingin otomatis upload via FTP ke Hostinger:"
-          echo "Tambahkan Secrets di GitHub: Settings -> Secrets and variables -> Actions"
-          echo "  - FTP_SERVER (contoh: ftp.domainanda.com atau IP Hostinger)"
-          echo "  - FTP_USERNAME (username FTP dari hPanel Hostinger)"
-          echo "  - FTP_PASSWORD (password FTP dari hPanel Hostinger)"
-          echo "Atau gunakan fitur Hostinger Git / Webhook di hPanel."
-          echo "=========================================================="

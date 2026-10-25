@@ -70,6 +70,10 @@ export async function fetchGlobalGasConfig(): Promise<SystemGasConfig> {
     });
 
     if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        return getInitialStoredConfig();
+      }
       const data = await res.json();
       if (data && data.success && data.config) {
         const remoteConfig: SystemGasConfig = {

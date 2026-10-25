@@ -34,6 +34,11 @@ export async function fetchAppDatabase(): Promise<{
       return { success: false, hasUpdates: false };
     }
 
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      return { success: false, hasUpdates: false };
+    }
+
     const json = await res.json();
     if (json.success && json.data) {
       const serverTime = json.lastUpdated || json.timestamp || 0;

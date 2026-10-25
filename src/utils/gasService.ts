@@ -98,21 +98,25 @@ export async function fetchEmployeesFromGAS(webhookUrl?: string): Promise<{
       headers: { 'Accept': 'application/json' }
     });
 
-    const data = await res.json();
-    if (res.ok && data && data.success && Array.isArray(data.pegawai)) {
-      // Simpan data resmi ke localStorage
-      localStorage.setItem('sinakhoda_pegawai_v3', JSON.stringify(data.pegawai));
-      localStorage.setItem('sinakhoda_dummy_purged_gas_v2', 'true');
-      return {
-        success: true,
-        count: data.pegawai.length,
-        pegawai: data.pegawai,
-        message: `Berhasil memuat ${data.pegawai.length} pegawai langsung dari Google Apps Script!`,
-        source: data.source || 'Google Apps Script (Deployed)'
-      };
-    } else {
-      throw new Error(data.message || 'Gagal memuat data dari endpoint GAS.');
+    if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.pegawai)) {
+          // Simpan data resmi ke localStorage
+          localStorage.setItem('sinakhoda_pegawai_v3', JSON.stringify(data.pegawai));
+          localStorage.setItem('sinakhoda_dummy_purged_gas_v2', 'true');
+          return {
+            success: true,
+            count: data.pegawai.length,
+            pegawai: data.pegawai,
+            message: `Berhasil memuat ${data.pegawai.length} pegawai langsung dari Google Apps Script!`,
+            source: data.source || 'Google Apps Script (Deployed)'
+          };
+        }
+      }
     }
+    throw new Error('Gagal memuat dari proxy backend, beralih ke direct fetch.');
   } catch (err: any) {
     // Fallback: Jika pemanggilan backend proxy gagal dan url tersedia, coba fetch langsung
     if (webhookUrl && webhookUrl.startsWith('http')) {
