@@ -1,75 +1,71 @@
-# 🚢 PANDUAN DEPLOYMENT & SOLUSI LAYAR PUTIH: SI NAKHODA DI HOSTINGER
+# 🚢 PANDUAN LENGKAP & SOLUSI INSTAN DEPLOYMENT HOSTINGER
 **Domain:** `https://sinahkoda.puskesmasseribuselatan.com/`
 
-Dokumen ini menjelaskan **penyebab utama layar putih (blank screen)** dan memberikan **solusi perbaikan langsung** agar aplikasi tampil sempurna di Hostinger.
+Dokumen ini memberikan solusi langsung agar aplikasi **SI NAKHODA** tampil sempurna tanpa kendala layar putih atau macet di tulisan *"Memuat Sistem Navigasi & Posisi Pegawai..."*.
 
 ---
 
-## 🔍 PENYEBAB LAYAR PUTIH DI `sinahkoda.puskesmasseribuselatan.com`
+## 🔍 MENGAPA TAMPILAN MACET DI SCREENSHOT ANDA?
 
-Sesuai informasi dari tim teknis Hostinger:
-> *"Hasil pemeriksaan: DNS, SSL, server, malware, PHP, dan resource hosting normal. Masalahnya ada pada deployment aplikasi React/Vite: file sumber seperti `src/main.tsx` masih disajikan, bukan hasil build produksi."*
+Pada screenshot yang Anda kirimkan:
+- Anda mengakses URL: `https://sinahkoda.puskesmasseribuselatan.com/dist/`
+- Tampilan macet di teks *"Memuat Sistem Navigasi & Posisi Pegawai..."*
 
-### Mengapa ini terjadi?
-1. Git repository standar awalnya mengabaikan folder `dist/` (karena `.gitignore`).
-2. Saat Anda menghubungkan Hostinger Git ke branch `main`, Hostinger meng-clone file mentah (`src/`, `package.json`, root `index.html`) ke dalam `public_html/`.
-3. Web server Hostinger (LiteSpeed/Apache) menyajikan `src/main.tsx` sebagai teks biasa (`text/plain`). Browser menolak mengeksekusi TypeScript mentah sehingga layar tetap putih.
-
----
-
-## 🛠️ APA YANG SUDAH KAMI PERBAIKI UNTUK ANDA:
-
-1. **Folder `dist/` Sekarang Disertakan di Repository Git:**
-   - Kami telah menghapus `dist/` dari `.gitignore` dan melakukan kompilasi produksi penuh (`npm run build`).
-   - Setiap file JavaScript (`.js`), CSS (`.css`), icon, dan manifest PWA sudah tersedia lengkap di folder `dist/`.
-
-2. **File `.htaccess` Cerdas Dual-Mode di Root & Dist:**
-   - Kami membuat file `/.htaccess` di root repository.
-   - File `.htaccess` ini secara otomatis mendeteksi: Jika repo di-clone utuh ke `public_html`, server akan **secara transparan mengarahkan semua lalu lintas ke `dist/` dan `dist/index.html`** tanpa perlu konfigurasi tambahan!
-
-3. **Fallback Otomatis di Root `index.html`:**
-   - Jika server statis mencoba menyajikan root `index.html`, script deteksi otomatis akan langsung memuat `/dist/` sehingga tidak ada layar putih.
+### Penyebabnya:
+1. **Server menyajikan file mentah (`src/main.tsx`), bukan JavaScript hasil kompilasi produksi.** Hostinger LiteSpeed menolak file TypeScript mentah sehingga aplikasi React tidak dapat me-render halaman.
+2. **Aset path sebelumnya menggunakan path absolut (`/assets/...`).** Jika dibuka dari subfolder `/dist/`, browser mencari aset di root sehingga file JavaScript tidak ditemukan.
 
 ---
 
-## ⚡ 2 CARA MUDAH AGAR WEBSITE LANGSUNG TAMPIL NORMAL:
+## 🛠️ APA YANG TELAH KAMI PERBAIKI DALAM KODE:
 
-### PILIHAN 1 (TERCEPAT & INSTAN 1 MENIT) — Lewat File Manager Hostinger
-Jika Anda ingin website langsung aktif detik ini juga:
-1. Buka **hPanel Hostinger** (`hpanel.hostinger.com`).
-2. Masuk ke menu **File Manager** -> Buka folder **`public_html/`**.
-3. Hapus file-file mentah lama yang ada di dalam `public_html/` (seperti folder `src/`, `node_modules/`, `package.json`, dll).
-4. Masuk ke folder **`dist/`** yang ada di repository proyek ini, lalu upload seluruh **ISI** dari folder `dist/` ke dalam `public_html/`:
-   - `index.html` (hasil build Vite)
-   - folder `assets/` (file `.js` dan `.css`)
+1. **Path Aset Relatif (`base: './'`):**
+   - Konfigurasi Vite kini telah diubah ke path relatif (`./assets/...`).
+   - Artinya, baik Anda mengakses `https://sinahkoda.puskesmasseribuselatan.com/` langsung ATAU via subfolder `https://sinahkoda.puskesmasseribuselatan.com/dist/`, seluruh file JS, CSS, dan icon akan terpanggil sempurna tanpa 404!
+2. **Kompilasi Produksi Penuh (`dist/`):**
+   - File `dist/index.html` dan seluruh folder `dist/assets/` sudah kami bangun ulang secara bersih.
+3. **Konfigurasi `.htaccess` LiteSpeed:**
+   - Menyertakan header `DirectoryIndex dist/index.html index.html` dan MIME type `application/javascript` resmi agar server Hostinger LiteSpeed tidak memperlakukan file script sebagai teks biasa.
+4. **Pembersihan Redirect Loop:**
+   - Menghapus script pengecekan manual yang sebelumnya memicu pengalihan URL yang tidak diinginkan.
+
+---
+
+## ⚡ CARA AGAR LANGSUNG TAMPIL (PILIH SALAH SATU):
+
+### 🌟 CARA TERMUDAH & PALING CEPAT (1 Menit via File Manager Hostinger)
+
+Ini adalah cara standar yang direkomendasikan langsung oleh Hostinger untuk aplikasi React/Vite:
+
+1. Buka **hPanel Hostinger** (`hpanel.hostinger.com`) ➔ Masuk ke **File Manager**.
+2. Masuk ke dalam folder **`public_html/`**.
+3. **PENTING:** Hapus file mentah lama yang ada di dalam `public_html/` (seperti folder `src/`, file `package.json`, dll).
+4. Ambil **seluruh isi** di dalam folder **`dist/`** proyek ini, lalu upload langsung ke dalam **`public_html/`**:
+   - `index.html` (file hasil build produksi)
+   - folder `assets/` (berisi file `.js` dan `.css`)
    - `.htaccess`
-   - `manifest.webmanifest`, `registerSW.js`, `favicon.ico`, `icon.svg`, gambar pwa
-5. Buka kembali `https://sinahkoda.puskesmasseribuselatan.com/` di browser (tekan `Ctrl + F5` untuk hard refresh).
-6. **Website langsung tampil sempurna dan responsif!**
+   - `manifest.webmanifest`, `favicon.ico`, `icon.svg`, gambar pwa
+   *(Catatan: Jangan upload folder `dist`-nya, melainkan file-file yang ada di DALAM folder `dist` langsung ke `public_html`).*
+5. Buka `https://sinahkoda.puskesmasseribuselatan.com/` di browser (tekan `Ctrl + F5` untuk hard refresh).
+6. **Aplikasi SI NAKHODA langsung tampil sempurna!**
 
 ---
 
-### PILIHAN 2 (OTOMATIS VIA HOSTINGER GIT)
-Karena kami sudah mengaktifkan `dist/` dan `.htaccess` cerdas di repository:
-1. Buka **hPanel Hostinger** -> **Git** (di bawah menu *Advanced*).
-2. Lakukan **Deploy** / **Pull** ulang repository terbaru Anda.
-3. Karena file `/.htaccess` dan folder `dist/` sekarang ikut ditarik oleh Hostinger:
-   - Server Hostinger otomatis mendeteksi folder `dist/` dan menyajikan aplikasi produksi secara langsung.
-4. Buka `https://sinahkoda.puskesmasseribuselatan.com/` -> website langsung aktif normal.
+### 🔄 CARA KEDUA: VIA HOSTINGER GIT (SINKRONISASI GITHUB)
 
-*(Opsional: Anda juga dapat menggunakan file workflow `/.github/workflows/deploy.yml` yang otomatis mem-publish hasil build ke branch `deploy` setiap kali ada commit baru).*
+Jika Anda ingin menggunakan fitur Git di Hostinger:
+1. Pastikan Anda melakukan **push** commit terbaru dari repository ini ke GitHub Anda.
+2. Di hPanel Hostinger ➔ **Git** (di menu *Advanced*):
+   - Klik tombol **Deploy** / **Pull** terbaru.
+3. Karena folder `dist/` dan file `.htaccess` cerdas sekarang sudah disertakan di repository, web server Hostinger akan otomatis menyajikan file produksi yang ada di `dist/`.
+4. Buka `https://sinahkoda.puskesmasseribuselatan.com/` (buka langsung alamat utamanya tanpa `/dist/`).
 
 ---
 
-## 🌐 MENGHUBUNGKAN GOOGLE SPREADSHEET (GAS) DI HOSTINGER
-
-Setelah website aktif:
-1. Akses `https://sinahkoda.puskesmasseribuselatan.com/`.
-2. Klik tombol **"LAPOR Si Nahkoda"** di halaman awal.
-3. Masuk ke **Menu Login Admin** (di Navbar pojok kanan atas atau tekan shortcut `Ctrl + Shift + A`):
+## 📱 MENGHUBUNGKAN GOOGLE APPS SCRIPT SETELAH TAMPIL:
+1. Buka web SI NAKHODA ➔ Klik **"LAPOR Si Nahkoda"**.
+2. Klik tombol **Login Admin** (atau tekan shortcut `Ctrl + Shift + A`):
    - NIP: `12345`
    - Password: `admin`
-4. Di Dashboard Admin, buka tab **Integrasi Database**:
-   - Masukkan URL Web App Google Apps Script Anda (dari menu *Deploy > New deployment* di Google Spreadsheet).
-   - Klik **"Tarik Data Pegawai dari Spreadsheet"**.
-5. Data seluruh pegawai langsung tersinkronisasi realtime ke sistem SI NAKHODA!
+3. Masuk ke tab **Integrasi Database** ➔ Masukkan URL Web App Google Apps Script Anda.
+4. Klik **"Tarik Data Pegawai dari Spreadsheet"** ➔ Data langsung tersinkronisasi realtime!

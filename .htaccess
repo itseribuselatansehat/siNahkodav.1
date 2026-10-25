@@ -3,6 +3,8 @@
 # Puskesmas Kecamatan Kepulauan Seribu Selatan
 # ==============================================================================
 
+DirectoryIndex dist/index.html index.html index.php
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
