@@ -252,8 +252,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           )}
 
-          {/* Admin Mode Status - Only shown when logged in as admin */}
-          {isAdminLoggedIn && (
+          {/* Admin Mode Status or Login Admin Button */}
+          {isAdminLoggedIn ? (
             <button
               onClick={() => {
                 onOpenAdminLogin();
@@ -265,9 +265,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Mode Pengelola Aktif</span>
               </div>
-              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 underline font-medium">Ubah / Keluar</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 underline font-medium">Keluar</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                onOpenAdminLogin();
+                onCloseMobile();
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors shadow-2xs"
+              title="Klik untuk membuka Login Pengelola / Admin (NIP: 12345, Password: admin)"
+            >
+              <Lock className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Login Admin / Pengelola</span>
             </button>
           )}
+
+          {/* Tombol Kembali ke Halaman Utama / Tentang SI NAKHODA */}
+          <button
+            onClick={() => {
+              onLogout();
+              onCloseMobile();
+            }}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
+          >
+            <Ship className="w-3.5 h-3.5 text-blue-500" />
+            <span>Halaman Depan SI NAKHODA</span>
+          </button>
 
 
           {/* Subtle footer with discreet trigger for admin */}

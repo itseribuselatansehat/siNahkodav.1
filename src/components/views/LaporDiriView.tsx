@@ -317,15 +317,15 @@ export const LaporDiriView: React.FC<LaporDiriViewProps> = ({
                     type="button"
                     onClick={() => {
                       setKegiatan('DLP (Dinas Luar Penuh)');
-                      setDetail('Rujukan Pasien Ambulance Laut');
+                      if (!detail || detail.includes('Rujukan')) setDetail('Dinas Luar Penuh');
                     }}
                     className={`px-2.5 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1 border ${
-                      kegiatan === 'DLP (Dinas Luar Penuh)' || kegiatan === 'Rujukan Pasien Laut'
+                      kegiatan === 'DLP (Dinas Luar Penuh)'
                         ? 'bg-rose-600 text-white border-rose-700 ring-2 ring-rose-400 shadow-xs scale-102'
                         : 'bg-rose-50 hover:bg-rose-100 text-rose-900 border-rose-200'
                     }`}
                   >
-                    <span>🚑 DLP Rujukan Laut</span>
+                    <span>🚢 DLP (Dinas Luar Penuh)</span>
                   </button>
 
                   <button
@@ -401,12 +401,12 @@ export const LaporDiriView: React.FC<LaporDiriViewProps> = ({
                     const val = e.target.value as LaporDiriRecord['kegiatan'];
                     setKegiatan(val);
                     if (val === 'DLP (Dinas Luar Penuh)') {
-                      setDetail('Rujukan Pasien Ambulance Laut');
+                      if (!detail || detail.includes('Rujukan')) setDetail('Dinas Luar Penuh');
                     }
                   }}
                   className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 outline-none transition"
                 >
-                  <option value="DLP (Dinas Luar Penuh)">🚑 DLP (Dinas Luar Penuh) - Rujukan Pasien Ambulance Laut</option>
+                  <option value="DLP (Dinas Luar Penuh)">🚢 DLP (Dinas Luar Penuh)</option>
                   <option value="Upacara">🎖️ Upacara (Upacara Resmi / Kenegaraan)</option>
                   <option value="Apel Pagi">🌅 Apel Pagi</option>
                   <option value="Dinas Luar Awal">🚢 Dinas Luar Awal</option>
@@ -530,7 +530,7 @@ export const LaporDiriView: React.FC<LaporDiriViewProps> = ({
                 className="text-xs px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 font-medium"
               >
                 <option value="Semua">Semua Kegiatan</option>
-                <option value="DLP (Dinas Luar Penuh)">🚑 DLP Rujukan Ambulance Laut</option>
+                <option value="DLP (Dinas Luar Penuh)">🚢 DLP (Dinas Luar Penuh)</option>
                 <option value="Apel Pagi">Apel Pagi</option>
                 <option value="Upacara">Upacara</option>
                 <option value="Dinas Luar Awal">Dinas Luar</option>

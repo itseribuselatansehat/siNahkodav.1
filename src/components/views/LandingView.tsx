@@ -1,14 +1,13 @@
 import React from 'react';
-import { Ship, HeartPulse, Compass, Anchor, Info, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
+import { Ship, HeartPulse, Compass, Anchor, Info, ArrowRight } from 'lucide-react';
 
 interface LandingViewProps {
   onEnterApp: () => void;
-  onOpenAdminLogin: () => void;
+  onOpenAdminLogin?: () => void;
 }
 
 export const LandingView: React.FC<LandingViewProps> = ({
   onEnterApp,
-  onOpenAdminLogin
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-blue-50/50 to-slate-100 flex flex-col justify-between p-4 md:p-8">
@@ -28,15 +27,12 @@ export const LandingView: React.FC<LandingViewProps> = ({
           </div>
         </div>
 
-        {/* Tombol Akses Login Admin (Mudah diakses pengelola) */}
-        <button
-          onClick={onOpenAdminLogin}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md shadow-slate-900/10 transition active:scale-95"
-          title="Login Pengelola & Pimpinan (NIP: 12345, Password: admin)"
-        >
-          <Lock className="w-3.5 h-3.5 text-amber-400" />
-          <span>Login Admin</span>
-        </button>
+        {/* Status Sistem Aktif Terintegrasi */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="hidden sm:inline">Sistem Aktif & Terintegrasi</span>
+          <span className="sm:hidden">Online</span>
+        </div>
       </div>
 
       {/* Main Hero & Philosophy Section */}
@@ -134,13 +130,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
         <div>
           © 2026 Puskesmas Kecamatan Kepulauan Seribu Selatan • Dinas Kesehatan DKI Jakarta
         </div>
-        <button
-          onClick={onOpenAdminLogin}
-          className="text-slate-600 hover:text-blue-600 font-bold flex items-center gap-1 underline transition"
-        >
-          <Lock className="w-3 h-3 text-amber-500" />
-          <span>Login Khusus Admin / Pengelola (NIP: 12345)</span>
-        </button>
+        <div className="text-slate-400 font-medium">
+          SI NAKHODA v2.4 • Navigasi Kinerja Terintegrasi
+        </div>
       </div>
     </div>
   );

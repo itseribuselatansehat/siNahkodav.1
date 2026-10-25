@@ -138,11 +138,8 @@ export default function App() {
     }
   }, [pegawaiList]);
 
-  // App is open directly without roadblock login for field staff
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    const saved = localStorage.getItem('sinakhoda_is_logged_v3');
-    return saved !== null ? saved === 'true' : true;
-  });
+  // Tampilkan single page tentang SI NAKHODA terlebih dahulu sebelum masuk ke aplikasi
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   // Hidden admin/pengelola mode
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
@@ -656,13 +653,31 @@ export default function App() {
       );
     }
     return (
-      <LandingView
-        onEnterLogin={() => setCurrentView('login')}
-        onEnterDirectDemo={() => {
-          setIsLoggedIn(true);
-          setCurrentView('dashboard');
-        }}
-      />
+      <>
+        <LandingView
+          onEnterApp={() => {
+            setIsLoggedIn(true);
+            setCurrentView('dashboard');
+          }}
+          onOpenAdminLogin={() => setIsAdminModalOpen(true)}
+        />
+        <AdminLoginModal
+          isOpen={isAdminModalOpen}
+          onClose={() => setIsAdminModalOpen(false)}
+          isAdminLoggedIn={isAdminLoggedIn}
+          onAdminLogin={(admin) => {
+            setIsAdminLoggedIn(true);
+            setIsLoggedIn(true);
+            setCurrentUser(admin);
+            setCurrentView('dashboard');
+          }}
+          onAdminLogout={() => {
+            setIsAdminLoggedIn(false);
+          }}
+          adminUser={currentUser}
+          pegawaiList={pegawaiList}
+        />
+      </>
     );
   }
 
